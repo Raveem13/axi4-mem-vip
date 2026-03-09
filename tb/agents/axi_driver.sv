@@ -51,34 +51,35 @@ class axi_driver extends uvm_driver #(axi_transaction);
         vif.awsize  <= tr.burst_size;
         vif.awburst <= tr.burst_type;
         vif.awid    <= tr.id;
-        vif.awvalid <= 1;
+        vif.drv_wr_cb.awvalid <= 1;
 
-        do @(posedge clk);
-        while(!vif.awready);
+        wait(vif.drv_wr_cb.awready);
 
-        vif.awvalid <= 0;
+        @(posedge clk);
+        vif.drv_wr_cb.awvalid <= 0;
 
         //---------- Write data channel ----------
         for (int i=0; i<beats; ++i) begin
             
             vif.wdata   <= tr.data[i];
             vif.wstrb   <= tr.strb[i];
-            vif.wvalid  <= 1;
+            vif.drv_wr_cb.wvalid  <= 1;
             vif.wlast   <= (i == beats-1);
 
-            do @(posedge clk);
-            while (!vif.wready);
+            wait(vif.drv_wr_cb.wready);
+
+            @(posedge clk);
         end
-        vif.wvalid  <= 0;
+        vif.drv_wr_cb.wvalid  <= 0;
         vif.wlast   <= 0;
 
         //---------- write response channel ----------
-        vif.bready <= 1;
+        vif.drv_wr_cb.bready <= 1;
 
-        do @(posedge clk);
-        while (!vif.bvalid);
+        wait(vif.drv_wr_cb.bvalid);
+        @(posedge vif.clk);
 
-        vif.bready <= 0;
+        vif.drv_wr_cb.bready <= 0;
     endtask
 
     //========== drive read txn ==========
@@ -94,23 +95,23 @@ class axi_driver extends uvm_driver #(axi_transaction);
         vif.arsize  <= tr.burst_size;
         vif.arburst <= tr.burst_type;
         vif.arid    <= tr.id;
-        vif.arvalid <= 1;
+        vif.drv_rd_cb.arvalid <= 1;
 
-        do @(posedge clk);
-        while (!vif.arready);
+        wait(vif.drv_rd_cb.arready);
 
-        vif.arvalid <= 0;
+        @(posedge clk);
+        vif.drv_rd_cb.arvalid <= 0;
 
         //---------- read data channel ----------
-        vif.rready  <= 1;
+        vif.drv_rd_cb.rready  <= 1;
         for (int i=0; i<beats; ++i) begin
             
-            do @(posedge clk);
-            while (!vif.rvalid);
+            wait(vif.drv_rd_cb.rvalid);
+            @(posedge clk);
 
         end
 
-        vif.rready  <= 0;
+        vif.drv_rd_cb.rready  <= 0;
 
     endtask
 

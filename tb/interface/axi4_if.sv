@@ -68,8 +68,28 @@ interface axi4_if #(
         input rvalid, rdata, rid, rresp, rlast,
     );
 
+    clocking drv_wr_cb @(posedge clk);
+
+        output  awvalid;
+        output  wvalid;
+        output  bready;
+        input   awready;
+        input   wready;
+        input   bvalid;
+
+    endclocking
+
+    clocking drv_rd_cb @(posedge clk);
+
+        output  arvalid;
+        output   rready;
+        input   arready;
+        input   rvalid;
+
+    endclocking
+
     //---------- Slave modport (DUT) ----------
-    modport master (
+    modport slave (
         input clk, rst_n,
         input awvalid, awaddr, awid,
         input awlen, awsize, awburst,
@@ -82,4 +102,9 @@ interface axi4_if #(
         output arready, rready,
         output rvalid, rdata, rid, rresp, rlast,
     );
+
+    modport monitor (
+        input *;
+    );
+    
 endinterface
