@@ -37,13 +37,13 @@ interface axi4_if #(
     logic   [1:0] bresp;
     
     //========== read address channel ==========
-    logic   arvalid;
     logic   arready;
     logic   [ADDR_WIDTH-1:0] araddr;
     logic   [ID_WIDTH-1:0] arid;
     logic   [7:0] arlen;
     logic   [2:0] arsize;
     logic   [1:0] arburst;
+    logic   arvalid;
 
     //=========== read data channel =========
     logic rvalid;

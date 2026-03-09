@@ -53,9 +53,9 @@ class axi_driver extends uvm_driver #(axi_transaction);
         vif.awid    <= tr.id;
         vif.awvalid <= 1;
 
-        wait(vif.awready);
+        do @(posedge clk);
+        while(!vif.awready);
 
-        @(posedge clk);
         vif.awvalid <= 0;
 
         //---------- Write data channel ----------
@@ -66,9 +66,8 @@ class axi_driver extends uvm_driver #(axi_transaction);
             vif.wvalid  <= 1;
             vif.wlast   <= (i == beats-1);
 
-            wait(vif.wready);
-
-            @(posedge clk);
+            do @(posedge clk);
+            while (!vif.wready);
         end
         vif.wvalid  <= 0;
         vif.wlast   <= 0;
@@ -76,8 +75,8 @@ class axi_driver extends uvm_driver #(axi_transaction);
         //---------- write response channel ----------
         vif.bready <= 1;
 
-        wait(vif.bvalid);
-        @(posedge vif.clk);
+        do @(posedge clk);
+        while (!vif.bvalid);
 
         vif.bready <= 0;
     endtask
@@ -97,17 +96,17 @@ class axi_driver extends uvm_driver #(axi_transaction);
         vif.arid    <= tr.id;
         vif.arvalid <= 1;
 
-        wait(vif.arready);
+        do @(posedge clk);
+        while (!vif.arready);
 
-        @(posedge clk);
         vif.arvalid <= 0;
 
         //---------- read data channel ----------
         vif.rready  <= 1;
         for (int i=0; i<beats; ++i) begin
             
-            wait(vif.rvalid);
-            @(posedge clk);
+            do @(posedge clk);
+            while (!vif.rvalid);
 
         end
 
