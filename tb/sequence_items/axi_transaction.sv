@@ -1,3 +1,11 @@
+//==========================================================
+// File        : axi_transaction.sv
+// Author      : Raveem
+// Created     : 2026-03-09
+// Description : axi transaction class
+//==========================================================
+
+
 class axi_transaction extends uvm_sequence_item;
     //========== transaction type ==========
     typedef enum { READ, WRITE } axi_cmd_t;
