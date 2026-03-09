@@ -14,18 +14,19 @@ interface axi4_if #(
     logic   rst_n;
 
     //========== write address channel ==========
-    logic   awvalid;
     logic   awready;
     logic   [ADDR_WIDTH-1:0]  awaddr;
-    logic   [ID_WIDTH-1:0]    awid;
     logic   [7:0] awlen;
     logic   [2:0] awsize;
     logic   [1:0] awburst;
+    logic   [ID_WIDTH-1:0]    awid;
+    logic   awvalid;
 
     //========== write data channel ==========
     logic   wvalid;
     logic   wready;
     logic   [DATA_WIDTH-1:0]  wdata;
+    logic   [ID_WIDTH-1:0]    wid;
     logic   [(DATA_WIDTH/8)-1:0] wstrb;
     logic   wlast;
     
@@ -52,5 +53,33 @@ interface axi4_if #(
     logic [1:0] rresp;
     logic rlast;
 
-    
+    //---------- Master modport (Driver) ----------
+    modport master (
+        input clk, rst_n,
+        output awvalid, awaddr, awid,
+        output awlen, awsize, awburst,
+        output wvalid, wdata, wid, wstrb, wlast,
+        output bready,
+        output arvalid, araddr, arid,
+        output arlen, arsize, arburst,
+
+        input awready, wready,
+        input arready, rready,
+        input rvalid, rdata, rid, rresp, rlast,
+    );
+
+    //---------- Slave modport (DUT) ----------
+    modport master (
+        input clk, rst_n,
+        input awvalid, awaddr, awid,
+        input awlen, awsize, awburst,
+        input wvalid, wdata, wid, wstrb, wlast,
+        input bready,
+        input arvalid, araddr, arid,
+        input arlen, arsize, arburst,
+
+        output awready, wready,
+        output arready, rready,
+        output rvalid, rdata, rid, rresp, rlast,
+    );
 endinterface
