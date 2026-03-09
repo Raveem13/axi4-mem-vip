@@ -6,10 +6,10 @@ ignore/
 doc/*.md
 
 # Scripts
-*.sh
+# *.sh
 *.bat
 *.tcl
-*.f
+# *.f
 
 # =========================
 # Vivado / XSIM generated

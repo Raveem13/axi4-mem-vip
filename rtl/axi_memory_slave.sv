@@ -19,4 +19,13 @@ module axi_memory_slave #(
     //========== Internal Memory ==========
     logic [DATA_WIDTH-1:0] mem [0:MEM_DEPTH-1];
     
+    //========== initialization ==========
+    initial begin
+        axi.awready = 0;
+        axi.wready  = 0;
+        axi.bvalid  = 0;
+        axi.arready = 0;
+        axi.rvalid  = 0;    
+    end
+
 endmodule
