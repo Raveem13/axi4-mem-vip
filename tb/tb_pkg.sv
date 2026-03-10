@@ -22,6 +22,7 @@ package tb_pkg;
     `include "agents/axi_sequencer.sv"  
     `include "agents/axi_driver.sv"
     `include "agents/axi_monitor.sv"
+    `include "agents/axi_agent.sv"
 
     //---------- scoreboard ----------
     `include "scoreboard/axi_scoreboard.sv"
