@@ -12,7 +12,7 @@ class axi_write_sequence extends axi_base_sequence;
         super.new(name);
     endfunction
 
-    virtual task body();
+    task body();
         axi_transaction tr;
 
         repeat(5) begin

@@ -5,7 +5,7 @@
 // Description : parent for all other sequences
 //==========================================================
 
-class axi_base_sequence extends uvm_sequence;
+class axi_base_sequence extends uvm_sequence #(axi_transaction);
     `uvm_object_utils(axi_base_sequence);
 
     function new(string name = "axi_base_sequence");
