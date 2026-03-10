@@ -23,9 +23,10 @@ axi4-mem-vip
 │   ├── driver
 │   ├── monitor
 │   ├── sequences
-│   └── scoreboard
-├── assertions/   # AXI protocol assertions
-└── tests         # Directed and random tests
+│   |── scoreboard
+|   └── tests     # Directed and random tests
+├── scripts/      # bash scripts (used WSL to run cmds in window) 
+
 ```
 
 ## Protocol Support
