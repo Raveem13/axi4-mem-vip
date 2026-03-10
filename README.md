@@ -11,7 +11,7 @@ SystemVerilog UVM verification IP for an **AXI4 memory slave**, supporting burst
 * **SystemVerilog Assertions (SVA)** for protocol validation
 * **Coverage-driven verification**
 
-## Architecture
+## File Structure
 
 The verification environment includes:
 
