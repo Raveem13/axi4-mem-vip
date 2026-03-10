@@ -32,6 +32,20 @@ module tb_top;
         .axi(axi_if0)
     );
 
+    // Dummy slave signal
+    always @(posedge clk) begin
+        if(!rst_n) begin
+            axi_if0.awready <= 0;
+            axi_if0.wready  <= 0;
+            axi_if0.bvalid  <= 0;
+        end
+        else begin
+            axi_if0.awready <= 1;
+            axi_if0.wready  <= 1;
+            axi_if0.bvalid  <= 1;
+        end
+    end
+
     //---------- Run ----------
     initial begin
         uvm_config_db#(virtual axi4_if)::set(null, "*", "vif", axi_if0);
