@@ -19,6 +19,7 @@ tb/sequences/axi_write_sequence.sv
 tb/agents/axi_sequencer.sv  
 tb/agents/axi_driver.sv
 tb/agents/axi_monitor.sv
+tb/scoreboard/axi_scoreboard.sv
 
 tb/env/axi_env.sv
 tb/test/axi_test.sv

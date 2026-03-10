@@ -24,6 +24,7 @@ package tb_pkg;
     `include "agents/axi_monitor.sv"
 
     //---------- scoreboard ----------
+    `include "scoreboard/axi_scoreboard.sv"
     
     //---------- env ----------
     `include "tb/env/axi_env.sv"
