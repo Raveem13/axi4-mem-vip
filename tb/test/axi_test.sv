@@ -20,4 +20,16 @@ class axi_test extends uvm_test;
         env = axi_env::type_id::create("env", this);
     endfunction
     
+    task run_phase(uvm_phase phase);
+        axi_write_sequence seq;
+
+        phase.raise_objection(this);
+        
+        `uvm_info("TEST", "Starting write sequence", UVM_NONE)
+        
+        seq = axi_write_sequence::type_id::create("seq");
+        seq.start(env.agent.seqr);
+        
+        phase.drop_objection(this);
+    endtask
 endclass
