@@ -8,7 +8,8 @@
 class axi_driver extends uvm_driver #(axi_transaction);
     `uvm_component_utils(axi_driver)
     
-    virtual axi4_if.master vif;
+    virtual axi4_if vif;
+    // typedef enum { READ, WRITE } axi_cmd_t;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -17,8 +18,10 @@ class axi_driver extends uvm_driver #(axi_transaction);
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
 
-        if (!uvm_config_db#(virtual axi4_if.master)::get(this, "", "vif", vif))
+        if (!uvm_config_db#(virtual axi4_if)::get(this, "", "vif", vif))
             `uvm_fatal("NOVIF", "Virtual interface not set")
+
+        `uvm_info("DRV", "Driver built", UVM_LOW)
     endfunction
     
     task run_phase(uvm_phase phase);
@@ -28,7 +31,7 @@ class axi_driver extends uvm_driver #(axi_transaction);
         forever begin
             seq_item_port.get_next_item(tr);
 
-            if (tr.cmd == WRITE) begin
+            if (tr.cmd == axi_transaction::WRITE) begin
                 drive_write(tr);
             end else begin
                 drive_read(tr);
@@ -55,7 +58,7 @@ class axi_driver extends uvm_driver #(axi_transaction);
 
         wait(vif.drv_wr_cb.awready);
 
-        @(posedge clk);
+        @(posedge vif.clk);
         vif.drv_wr_cb.awvalid <= 0;
 
         //---------- Write data channel ----------
@@ -68,7 +71,7 @@ class axi_driver extends uvm_driver #(axi_transaction);
 
             wait(vif.drv_wr_cb.wready);
 
-            @(posedge clk);
+            @(posedge vif.clk);
         end
         vif.drv_wr_cb.wvalid  <= 0;
         vif.wlast   <= 0;
@@ -99,7 +102,7 @@ class axi_driver extends uvm_driver #(axi_transaction);
 
         wait(vif.drv_rd_cb.arready);
 
-        @(posedge clk);
+        @(posedge vif.clk);
         vif.drv_rd_cb.arvalid <= 0;
 
         //---------- read data channel ----------
@@ -107,7 +110,7 @@ class axi_driver extends uvm_driver #(axi_transaction);
         for (int i=0; i<beats; ++i) begin
             
             wait(vif.drv_rd_cb.rvalid);
-            @(posedge clk);
+            @(posedge vif.clk);
 
         end
 

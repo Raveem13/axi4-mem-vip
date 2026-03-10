@@ -6,10 +6,10 @@
 //==========================================================
 
 interface axi4_if #(
-    parameter ADDR_WIDTH = 32;
-    parameter DATA_WIDTH = 32;
-    parameter ID_WIDTH   = 4;
-)   
+    parameter ADDR_WIDTH = 32,
+    parameter DATA_WIDTH = 32,
+    parameter ID_WIDTH   = 4 
+);
     logic   clk;
     logic   rst_n;
 
@@ -62,10 +62,11 @@ interface axi4_if #(
         output bready,
         output arvalid, araddr, arid,
         output arlen, arsize, arburst,
-
+        output rready,
         input awready, wready,
-        input arready, rready,
-        input rvalid, rdata, rid, rresp, rlast,
+        input bvalid, bid, bresp,
+        input arready,
+        input rvalid, rdata, rid, rresp, rlast
     );
 
     clocking drv_wr_cb @(posedge clk);
@@ -99,12 +100,22 @@ interface axi4_if #(
         input arlen, arsize, arburst,
 
         output awready, wready,
+        output bvalid, bid, bresp,
         output arready, rready,
-        output rvalid, rdata, rid, rresp, rlast,
+        output rvalid, rdata, rid, rresp, rlast
     );
 
     modport monitor (
-        input *;
+        input clk, rst_n,
+        input awready, wready,
+        input arready, rready,
+        input rvalid, rdata, rid, rresp, rlast,
+        input awvalid, awaddr, awid,
+        input awlen, awsize, awburst,
+        input wvalid, wdata, wid, wstrb, wlast,
+        input bready,
+        input arvalid, araddr, arid,
+        input arlen, arsize, arburst
     );
-    
+
 endinterface

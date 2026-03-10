@@ -5,6 +5,8 @@
 // Description : axi transaction class
 //==========================================================
 
+import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class axi_transaction extends uvm_sequence_item;
     //========== transaction type ==========
@@ -40,7 +42,7 @@ class axi_transaction extends uvm_sequence_item;
 
     constraint data_size_c {
         data.size() == burst_len;
-        strobe.size() == burst_len;
+        strb.size() == burst_len;
     }
     function new(string name="axi_transaction");
         super.new(name);
