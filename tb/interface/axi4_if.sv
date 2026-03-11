@@ -26,7 +26,7 @@ interface axi4_if #(
     logic   wvalid;
     logic   wready;
     logic   [DATA_WIDTH-1:0]  wdata;
-    logic   [ID_WIDTH-1:0]    wid;
+    // logic   [ID_WIDTH-1:0]    wid;
     logic   [(DATA_WIDTH/8)-1:0] wstrb;
     logic   wlast;
     
@@ -58,7 +58,7 @@ interface axi4_if #(
         input clk, rst_n,
         output awvalid, awaddr, awid,
         output awlen, awsize, awburst,
-        output wvalid, wdata, wid, wstrb, wlast,
+        output wvalid, wdata, wstrb, wlast,
         output bready,
         output arvalid, araddr, arid,
         output arlen, arsize, arburst,
@@ -70,13 +70,31 @@ interface axi4_if #(
     );
 
     clocking drv_wr_cb @(posedge clk);
+        default input #1step output #0;
+        // Write address channel
+        output awaddr;
+        output awlen;
+        output awsize;
+        output awburst;
+        output awid;
+        output awvalid;
 
-        output  awvalid;
-        output  wvalid;
-        output  bready;
-        input   awready;
-        input   wready;
-        input   bvalid;
+        input  awready;
+
+        // Write data channel
+        output wdata;
+        output wstrb;
+        output wlast;
+        output wvalid;
+
+        input  wready;
+
+        // Write response channel
+        input  bvalid;
+        input  bid;
+        input  bresp;
+
+        output bready;
 
     endclocking
 
@@ -94,7 +112,7 @@ interface axi4_if #(
         input clk, rst_n,
         input awvalid, awaddr, awid,
         input awlen, awsize, awburst,
-        input wvalid, wdata, wid, wstrb, wlast,
+        input wvalid, wdata, wstrb, wlast,
         input bready,
         input arvalid, araddr, arid,
         input arlen, arsize, arburst,
@@ -112,7 +130,7 @@ interface axi4_if #(
         input rvalid, rdata, rid, rresp, rlast,
         input awvalid, awaddr, awid,
         input awlen, awsize, awburst,
-        input wvalid, wdata, wid, wstrb, wlast,
+        input wvalid, wdata, wstrb, wlast,
         input bready,
         input arvalid, araddr, arid,
         input arlen, arsize, arburst

@@ -29,7 +29,7 @@ class axi_transaction extends uvm_sequence_item;
 
     //========== constraints ==========
     constraint burst_len_c {
-        burst_len inside {[0:15]};
+        burst_len inside {[1:15]};
     }
 
     constraint burst_size_c {
@@ -44,6 +44,11 @@ class axi_transaction extends uvm_sequence_item;
         data.size() == burst_len;
         strb.size() == burst_len;
     }
+
+    constraint address_c {
+        addr dist { [0:1024] := 90, [1025:4294967295] := 10};
+    }
+    
     function new(string name="axi_transaction");
         super.new(name);
     endfunction

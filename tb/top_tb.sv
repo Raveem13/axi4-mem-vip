@@ -15,7 +15,7 @@ module tb_top;
 
     //---------- Reset ----------
     initial begin
-        clk     = 0;
+        clk     = 1;
         rst_n       = 0;
         #20 rst_n   = 1;
     end
@@ -33,17 +33,24 @@ module tb_top;
     );
 
     // Dummy slave signal
-    always @(posedge clk) begin
-        if(!rst_n) begin
-            axi_if0.awready <= 0;
-            axi_if0.wready  <= 0;
-            axi_if0.bvalid  <= 0;
-        end
-        else begin
-            axi_if0.awready <= 1;
-            axi_if0.wready  <= 1;
-            axi_if0.bvalid  <= 1;
-        end
+    // always @(posedge clk) begin
+    //     if(!rst_n) begin
+    //         axi_if0.awready <= 0;
+    //         axi_if0.wready  <= 0;
+    //         axi_if0.bvalid  <= 0;
+    //     end
+    //     else begin
+    //         axi_if0.awready <= 1;
+    //         axi_if0.wready  <= 1;
+    //         axi_if0.bvalid  <= 1;
+    //     end
+    // end
+
+    // VCD Dump for GTKWave
+    // ---------------------------
+    initial begin
+        $dumpfile("dump.vcd");      // name of waveform file
+        $dumpvars(0, tb_top.axi_if0);       // dump all signals in tb_top hierarchy
     end
 
     //---------- Run ----------

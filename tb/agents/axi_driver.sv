@@ -49,38 +49,40 @@ class axi_driver extends uvm_driver #(axi_transaction);
         beats = tr.burst_len;
 
         //---------- Write address channel ----------
-        vif.awaddr  <= tr.addr;
-        vif.awlen   <= tr.burst_len-1;
-        vif.awsize  <= tr.burst_size;
-        vif.awburst <= tr.burst_type;
-        vif.awid    <= tr.id;
+        @(vif.drv_wr_cb);
+        
+        vif.drv_wr_cb.awaddr  <= tr.addr;
+        vif.drv_wr_cb.awlen   <= tr.burst_len-1;
+        vif.drv_wr_cb.awsize  <= tr.burst_size;
+        vif.drv_wr_cb.awburst <= tr.burst_type;
+        vif.drv_wr_cb.awid    <= tr.id;
         vif.drv_wr_cb.awvalid <= 1;
 
-        wait(vif.drv_wr_cb.awready);
+        do @(vif.drv_wr_cb);
+        while(!(vif.drv_wr_cb.awready));
 
-        @(posedge vif.clk);
         vif.drv_wr_cb.awvalid <= 0;
 
         //---------- Write data channel ----------
         for (int i=0; i<beats; ++i) begin
             
-            vif.wdata   <= tr.data[i];
-            vif.wstrb   <= tr.strb[i];
+            vif.drv_wr_cb.wdata   <= tr.data[i];
+            vif.drv_wr_cb.wstrb   <= tr.strb[i];
             vif.drv_wr_cb.wvalid  <= 1;
-            vif.wlast   <= (i == beats-1);
+            vif.drv_wr_cb.wlast   <= (i == beats-1);
 
-            wait(vif.drv_wr_cb.wready);
-
-            @(posedge vif.clk);
+            do @(vif.drv_wr_cb);
+            while(!(vif.drv_wr_cb.wready));
+            
         end
         vif.drv_wr_cb.wvalid  <= 0;
-        vif.wlast   <= 0;
+        vif.drv_wr_cb.wlast   <= 0;
 
         //---------- write response channel ----------
         vif.drv_wr_cb.bready <= 1;
 
         wait(vif.drv_wr_cb.bvalid);
-        @(posedge vif.clk);
+        @(vif.drv_wr_cb);
 
         vif.drv_wr_cb.bready <= 0;
     endtask
