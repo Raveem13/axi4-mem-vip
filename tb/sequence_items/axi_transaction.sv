@@ -32,6 +32,7 @@ class axi_transaction extends uvm_sequence_item;
         burst_len inside {[1:15]};
     }
 
+
     constraint burst_size_c {
         burst_size == 3'b010;       // 4 byte
     }
@@ -46,7 +47,11 @@ class axi_transaction extends uvm_sequence_item;
     }
 
     constraint address_c {
-        addr dist { [0:1024] := 90, [1025:4294967295] := 10};
+        addr dist { [0:4095] };
+    }
+
+    constraint aligned_addr_c {
+        addr % 4 == 0;
     }
     
     function new(string name="axi_transaction");

@@ -16,7 +16,7 @@ module axi_memory_slave #(
     axi4_if axi
 );
     //---------- Internal signals ----------    
-    logic [ADDR_WIDTH-1: 0] awaddr_reg, araddr_reg;
+    logic [ADDR_WIDTH-1: 0] addr_index, araddr_reg;
     logic [ID_WIDTH-1:0]    awid_reg;
     logic [7:0]   awlen_reg;
     logic [2:0]   awsize_reg;
@@ -104,7 +104,7 @@ module axi_memory_slave #(
             case (wstate)
                 W_IDLE  : begin
                     if (axi.awvalid && axi.awready) begin
-                        awaddr_reg  <= axi.awaddr;
+                        addr_index  <= axi.awaddr >> 2;
                         awid_reg    <= axi.awid;
                         awlen_reg   <= axi.awlen;
                         awsize_reg  <= axi.awsize;
@@ -114,14 +114,15 @@ module axi_memory_slave #(
                 W_DATA  : begin
                     if (axi.wvalid && axi.wready) begin
                         $display("Writing to memory");
-                        mem[awaddr_reg]  <= axi.wdata;
+                        mem[addr_index]  <= axi.wdata;
+                        addr_index <= addr_index + 1;
                     end
                     
                 end
 
                 W_RESP  : begin
                     axi.bid     <= axi.awid;
-                    axi.bresp   <= (awaddr_reg < MEM_DEPTH) ? 2'b00 : 2'b01;
+                    axi.bresp   <= (axi.awaddr < MEM_DEPTH * 4) ? 2'b00 : 2'b01;
                 end
 
             endcase
@@ -145,6 +146,7 @@ module axi_memory_slave #(
         $display("%t [DUT] %s awready=%0d awvalid=%0b awaddr=%0h awid=%0h", $time, wstate.name(), axi.awready, axi.awvalid, axi.awaddr, axi.awid);
         $display("%t [DUT] %s wready=%0d wvalid=%0b wdata=%0h wstrb=%0d wlast=%0b", $time, wstate.name(), axi.wready, axi.wvalid, axi.wdata, axi.wstrb, axi.wlast);
         $display("%t [DUT] %s bvalid=%0b bresp=%0d bid=%0h", $time, wstate.name(), axi.bvalid, axi.bresp, axi.bid);
-        $display("address awaddr=%0h waddr_reg=%0h", axi.awaddr, awaddr_reg);
+        // $display("address awaddr=%0h waddr_reg=%0h", axi.awaddr, addr_index);
+        // $display("%t address memory [%0h] = %0h", $time, addr_index, mem[addr_index]);
     end
 endmodule
