@@ -81,8 +81,8 @@ class axi_driver extends uvm_driver #(axi_transaction);
         //---------- write response channel ----------
         vif.drv_wr_cb.bready <= 1;
 
-        wait(vif.drv_wr_cb.bvalid);
-        @(vif.drv_wr_cb);
+        do @(vif.drv_wr_cb);
+        while(!vif.drv_wr_cb.bvalid);
 
         vif.drv_wr_cb.bready <= 0;
     endtask

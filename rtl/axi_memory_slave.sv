@@ -19,6 +19,7 @@ module axi_memory_slave #(
     logic [ADDR_WIDTH-1: 0] addr_index, araddr_reg;
     logic [ID_WIDTH-1:0]    awid_reg;
     logic [7:0]   awlen_reg;
+    logic [3:0]   wstrb_reg;
     logic [2:0]   awsize_reg;
 
     //========== Internal Memory ==========
@@ -94,6 +95,8 @@ module axi_memory_slave #(
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
+            mem <= '{default : 0};
+
             axi.awready <= 0;
             axi.wready  <= 0;
             axi.bvalid  <= 0;
@@ -113,11 +116,19 @@ module axi_memory_slave #(
                 
                 W_DATA  : begin
                     if (axi.wvalid && axi.wready) begin
-                        $display("Writing to memory");
-                        mem[addr_index]  <= axi.wdata;
-                        addr_index <= addr_index + 1;
+                        logic [31:0] curr_word;
+                        curr_word = mem[addr_index];
+
+                        for (int i=0; i<4; ++i) begin
+                            if (axi.wstrb[i])
+                                curr_word[8*i +: 8]  = axi.wdata[8*i +: 8];
+                        end
+                        mem[addr_index] = curr_word;
+                        addr_index = addr_index + 1;
+                        
+                        $display("%t WRITE addr=%0h data=%h strb=%b result=%h",
+                                $time, addr_index, axi.wdata, axi.wstrb, curr_word);
                     end
-                    
                 end
 
                 W_RESP  : begin
@@ -143,10 +154,10 @@ module axi_memory_slave #(
 
     // gated log
     always_ff @(posedge clk or negedge rst_n) begin
-        $display("%t [DUT] %s awready=%0d awvalid=%0b awaddr=%0h awid=%0h", $time, wstate.name(), axi.awready, axi.awvalid, axi.awaddr, axi.awid);
-        $display("%t [DUT] %s wready=%0d wvalid=%0b wdata=%0h wstrb=%0d wlast=%0b", $time, wstate.name(), axi.wready, axi.wvalid, axi.wdata, axi.wstrb, axi.wlast);
+        // $display("%t [DUT] %s awready=%0d awvalid=%0b awaddr=%0h awid=%0h", $time, wstate.name(), axi.awready, axi.awvalid, axi.awaddr, axi.awid);
+        // $display("%t [DUT] %s wready=%0d wvalid=%0b wdata=%0h wstrb=%0d wlast=%0b", $time, wstate.name(), axi.wready, axi.wvalid, axi.wdata, axi.wstrb, axi.wlast);
         $display("%t [DUT] %s bvalid=%0b bresp=%0d bid=%0h", $time, wstate.name(), axi.bvalid, axi.bresp, axi.bid);
         // $display("address awaddr=%0h waddr_reg=%0h", axi.awaddr, addr_index);
-        // $display("%t address memory [%0h] = %0h", $time, addr_index, mem[addr_index]);
+        // $strobe("%t mem[%0h] = %h", $time, addr_index-1, mem[addr_index-1]);
     end
 endmodule

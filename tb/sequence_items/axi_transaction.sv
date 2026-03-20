@@ -53,7 +53,7 @@ class axi_transaction extends uvm_sequence_item;
     constraint aligned_addr_c {
         addr % 4 == 0;
     }
-    
+        
     function new(string name="axi_transaction");
         super.new(name);
     endfunction
