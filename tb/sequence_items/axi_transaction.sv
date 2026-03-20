@@ -32,7 +32,6 @@ class axi_transaction extends uvm_sequence_item;
         burst_len inside {[1:15]};
     }
 
-
     constraint burst_size_c {
         burst_size == 3'b010;       // 4 byte
     }
