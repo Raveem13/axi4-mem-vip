@@ -24,7 +24,7 @@ class axi_scoreboard extends uvm_scoreboard;
 
     function void write(axi_transaction tr);
         `uvm_info("SCB", 
-                $sformatf("Txn received: cmd=%s, addr=%0d, id=%0d",
+                $sformatf("Txn received: cmd=%s, addr=%0h, id=%0h",
                             tr.cmd.name(), tr.addr, tr.id), 
                             UVM_MEDIUM)
         

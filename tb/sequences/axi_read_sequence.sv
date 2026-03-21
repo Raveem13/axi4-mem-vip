@@ -22,7 +22,7 @@ class axi_read_sequence extends axi_base_sequence;
 
             assert (tr.randomize() with {
                 cmd == READ;
-            })
+            });
             `uvm_info("AXI_SEQ", tr.sprint(), UVM_MEDIUM)
 
             finish_item(tr);

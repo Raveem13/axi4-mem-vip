@@ -21,15 +21,20 @@ class axi_test extends uvm_test;
     endfunction
     
     task run_phase(uvm_phase phase);
-        axi_write_sequence seq;
+        // axi_write_sequence  w_seq;
+        axi_read_sequence   r_seq;
 
         phase.raise_objection(this);
         
-        `uvm_info("TEST", "Starting write sequence", UVM_NONE)
+        // `uvm_info("TEST", "Starting write sequence", UVM_NONE)
         
-        seq = axi_write_sequence::type_id::create("seq");
-        seq.start(env.agent.seqr);
+        // w_seq = axi_write_sequence::type_id::create("w_seq");
+        // w_seq.start(env.agent.seqr);
         
+         `uvm_info("TEST", "Starting read sequence", UVM_NONE)
+        r_seq = axi_read_sequence::type_id::create("r_seq");
+        r_seq.start(env.agent.seqr);
+
         phase.drop_objection(this);
     endtask
 endclass

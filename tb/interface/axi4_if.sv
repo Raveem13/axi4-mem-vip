@@ -99,6 +99,7 @@ interface axi4_if #(
     endclocking
 
     clocking drv_rd_cb @(posedge clk);
+        default input #1step output #0;
 
         output  arvalid;
         output   rready;
