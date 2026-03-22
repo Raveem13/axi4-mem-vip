@@ -79,9 +79,10 @@ module axi_memory_slave #(
         endcase
     end
 
+    //---------- Output logic ----------
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            mem <= '{default : 0};
+            // mem <= '{default : 0};
 
             axi.awready <= 0;
             axi.wready  <= 0;
@@ -135,18 +136,6 @@ module axi_memory_slave #(
         end 
     end
 
-    // // output logic
-    // always_ff @(posedge clk or negedge rst_n) begin
-    //     if (!rst_n) begin
-    //         axi.bid     <= 0;
-    //         axi.bresp   <= 0;
-    //         axi.bvalid  <= 0;
-    //     end else if (axi.wvalid && axi.wlast) begin
-    //         axi.bresp   <= (waddr < MEM_DEPTH) ? 2'b00 : 2'b01;
-    //         axi.bvalid  <= 1;
-    //     end
-    // end
-
     // gated log
     // always_ff @(posedge clk or negedge rst_n) begin
     //     $display("%t [DUT-I/f] %s awready=%0d awvalid=%0b awaddr=%0h awid=%0h", $time, wstate.name(), axi.awready, axi.awvalid, axi.awaddr, axi.awid);
@@ -157,8 +146,14 @@ module axi_memory_slave #(
     // end
 
     //========== Read FSM ==========
+    initial begin
+        for (int i=0; i<MEM_DEPTH; ++i) begin
+            mem[i] = i; // initialize memory with some data
+        end
+    end
 
     logic [7:0] arlen_reg, beat_count;
+    logic [31:0] mem_data;
 
     typedef enum {
         R_IDLE,
@@ -202,6 +197,8 @@ module axi_memory_slave #(
             axi.arready <= 0;
             axi.rvalid  <= 0;
             beat_count  <= 0;
+            axi.rlast   <= 0;
+            axi.rresp   <= 0;
         end else begin
             case (rstate)
                 R_IDLE  : begin
@@ -220,29 +217,35 @@ module axi_memory_slave #(
                     axi.arready <= 0;
                     axi.rvalid  <= 1;
                     if (axi.rvalid && axi.rready) begin
-                        logic [31:0] mem_data;
                         mem_data = mem[raddr_index];
-                        axi.rdata   <= mem_data;
+                        // axi.rdata   <= mem_data;
                         axi.rid     <= arid_reg;
                         axi.rresp   <= mem_data ? 2'b00 : 2'b01;
-                        axi.rlast   <= (beat_count == arlen_reg);
 
-                        $display("%t READ addr=%0h data=%h result=%h resp=%b",
-                            $time, raddr_index, axi.rdata, mem_data, axi.rresp);
-
-                        raddr_index <= raddr_index + 1;
-                        beat_count  <= beat_count + 1;
+                        $display("%t READ addr=%0h mem[%0h] = %0h resp=%b",
+                            $time, axi.araddr, raddr_index,mem_data, axi.rresp);
+                        
+                        if (beat_count == arlen_reg) begin
+                            axi.rlast <= 1;
+                        end else begin
+                            raddr_index <= raddr_index + 1;
+                            beat_count  <= beat_count + 1;
+                        end
                     end
                 end
             endcase
         end
     end
 
+    assign axi.rdata = mem_data;
+
     // Log
     always_ff @(posedge clk or negedge rst_n) begin
-        $display("%t [DUT] %s arready=%0d arvalid=%0b araddr=%0h arid=%0h", $time, rstate.name(), axi.arready, axi.arvalid, axi.araddr, axi.arid);
-        $display("%t [DUT] %s rready=%0d rvalid=%0b rdata=%0h rlast=%0b", $time, rstate.name(), axi.rready, axi.rvalid, axi.rdata, axi.rlast);
-        $display("%t [DUT] %s araddr=%0h raddr_index=%0h beat_count=%0d", $time, rstate.name(), axi.araddr, raddr_index, beat_count);
+        // $display("%t [DUT] %s arready=%0d arvalid=%0b araddr=%0h arid=%0h", $time, rstate.name(), axi.arready, axi.arvalid, axi.araddr, axi.arid);
+        // $display("%t [DUT] %s rready=%0d rvalid=%0b rdata=%0h rlast=%0b", $time, rstate.name(), axi.rready, axi.rvalid, axi.rdata, axi.rlast);
+        // $display("%t [DUT] %s araddr=%0h raddr_index=%0h beat_count=%0d", $time, rstate.name(), axi.araddr, raddr_index, beat_count);
+        
+        $display("%t [DUT] %s beat_count=%0d rlast=%0b", $time, rstate.name(), beat_count, axi.rlast);
     end
     
 endmodule

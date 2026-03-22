@@ -49,7 +49,7 @@ module tb_top;
     // VCD Dump for GTKWave
     // ---------------------------
     initial begin
-        $dumpfile("dump3.vcd");      // name of waveform file
+        $dumpfile("dut_read_dump2.vcd");      // name of waveform file
         $dumpvars(0, tb_top.axi_if0);       // dump all signals in tb_top hierarchy
     end
 

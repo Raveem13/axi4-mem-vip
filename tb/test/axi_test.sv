@@ -27,7 +27,6 @@ class axi_test extends uvm_test;
         phase.raise_objection(this);
         
         // `uvm_info("TEST", "Starting write sequence", UVM_NONE)
-        
         // w_seq = axi_write_sequence::type_id::create("w_seq");
         // w_seq.start(env.agent.seqr);
         
