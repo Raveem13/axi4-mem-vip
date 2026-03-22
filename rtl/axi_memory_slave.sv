@@ -183,14 +183,12 @@ module axi_memory_slave #(
 
         case (rstate)
             R_IDLE  : begin
-                // axi.arready = 1;
                 if (axi.arvalid && axi.arready) begin
                     next_rstate = R_DATA;
                 end
             end
 
             R_DATA  : begin
-                // axi.rvalid = 1;
                 if (axi.rlast && axi.rvalid) begin
                     next_rstate = R_IDLE;
                 end
@@ -198,17 +196,18 @@ module axi_memory_slave #(
         endcase
     end
 
-
+    //---------- Output logic ----------
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             axi.arready <= 0;
-            axi.rvalid <= 0;
-            beat_count <= 0;
+            axi.rvalid  <= 0;
+            beat_count  <= 0;
         end else begin
             case (rstate)
                 R_IDLE  : begin
                     axi.arready <= 1;
                     axi.rvalid  <= 0;
+                    axi.rlast   <= 0;
                     beat_count  <= 0;
                     if (axi.arvalid && axi.arready) begin
                         raddr_index <= axi.araddr >> 2;
@@ -219,21 +218,22 @@ module axi_memory_slave #(
 
                 R_DATA  : begin
                     axi.arready <= 0;
-                    axi.rvalid  <= 1;
+                    // axi.rvalid  <= 1;
                     if (axi.rvalid && axi.rready) begin
                         logic [31:0] mem_data;
                         mem_data = mem[raddr_index];
-                        axi.rdata   <= mem_data;
-                        axi.rid     <= arid_reg;
-                        axi.rresp   <= mem_data ? 2'b00 : 2'b01;
-                        axi.rlast   <= (beat_count == arlen_reg);
+                        axi.rdata   = mem_data;
+                        axi.rid     = arid_reg;
+                        axi.rresp   = mem_data ? 2'b00 : 2'b01;
+                        axi.rlast   = (beat_count == arlen_reg);
 
                         $display("%t READ addr=%0h data=%h result=%h resp=%b",
                             $time, raddr_index, axi.rdata, mem_data, axi.rresp);
 
-                        raddr_index = raddr_index + 1;
-                        beat_count  = beat_count + 1;
+                        raddr_index= raddr_index + 1;
+                        beat_count = beat_count + 1;
                     end
+                    axi.rvalid  = 1;
                 end
             endcase
         end
@@ -243,6 +243,7 @@ module axi_memory_slave #(
     always_ff @(posedge clk or negedge rst_n) begin
         $display("%t [DUT] %s arready=%0d arvalid=%0b araddr=%0h arid=%0h", $time, rstate.name(), axi.arready, axi.arvalid, axi.araddr, axi.arid);
         $display("%t [DUT] %s rready=%0d rvalid=%0b rdata=%0h rlast=%0b", $time, rstate.name(), axi.rready, axi.rvalid, axi.rdata, axi.rlast);
+        $display("%t [DUT] %s araddr=%0h raddr_index=%0h beat_count=%0d", $time, rstate.name(), axi.araddr, raddr_index, beat_count);
     end
     
 endmodule

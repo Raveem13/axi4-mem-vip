@@ -97,11 +97,11 @@ class axi_driver extends uvm_driver #(axi_transaction);
         //---------- read address channel ----------
         @(vif.drv_rd_cb);
 
-        vif.araddr  <= tr.addr;
-        vif.arlen   <= tr.burst_len-1;
-        vif.arsize  <= tr.burst_size;
-        vif.arburst <= tr.burst_type;
-        vif.arid    <= tr.id;
+        vif.drv_rd_cb.araddr  <= tr.addr;
+        vif.drv_rd_cb.arlen   <= tr.burst_len-1;
+        vif.drv_rd_cb.arsize  <= tr.burst_size;
+        vif.drv_rd_cb.arburst <= tr.burst_type;
+        vif.drv_rd_cb.arid    <= tr.id;
         vif.drv_rd_cb.arvalid <= 1;
 
         do @(vif.drv_rd_cb);
@@ -115,7 +115,7 @@ class axi_driver extends uvm_driver #(axi_transaction);
             
             do @(vif.drv_rd_cb);
             while(!vif.drv_rd_cb.rvalid);
-
+            
         end
 
         vif.drv_rd_cb.rready  <= 0;

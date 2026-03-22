@@ -102,7 +102,9 @@ interface axi4_if #(
         default input #1step output #0;
 
         output  arvalid;
-        output   rready;
+        output  rready;
+        output   araddr, arid, arlen, arsize, arburst;
+        input  rdata, rid, rresp, rlast;
         input   arready;
         input   rvalid;
 
