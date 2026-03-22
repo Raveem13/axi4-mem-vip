@@ -111,12 +111,9 @@ class axi_driver extends uvm_driver #(axi_transaction);
 
         //---------- read data channel ----------
         vif.drv_rd_cb.rready  <= 1;
-        for (int i=0; i<beats; ++i) begin
             
-            do @(vif.drv_rd_cb);
-            while(!vif.drv_rd_cb.rvalid);
-            
-        end
+        do @(vif.drv_rd_cb);
+        while(!(vif.drv_rd_cb.rvalid && vif.drv_rd_cb.rlast));
 
         vif.drv_rd_cb.rready  <= 0;
 

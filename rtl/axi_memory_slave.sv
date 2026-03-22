@@ -189,7 +189,7 @@ module axi_memory_slave #(
             end
 
             R_DATA  : begin
-                if (axi.rlast && axi.rvalid) begin
+                if (axi.rlast && axi.rvalid && axi.rready) begin
                     next_rstate = R_IDLE;
                 end
             end
@@ -218,22 +218,21 @@ module axi_memory_slave #(
 
                 R_DATA  : begin
                     axi.arready <= 0;
-                    // axi.rvalid  <= 1;
+                    axi.rvalid  <= 1;
                     if (axi.rvalid && axi.rready) begin
                         logic [31:0] mem_data;
                         mem_data = mem[raddr_index];
-                        axi.rdata   = mem_data;
-                        axi.rid     = arid_reg;
-                        axi.rresp   = mem_data ? 2'b00 : 2'b01;
-                        axi.rlast   = (beat_count == arlen_reg);
+                        axi.rdata   <= mem_data;
+                        axi.rid     <= arid_reg;
+                        axi.rresp   <= mem_data ? 2'b00 : 2'b01;
+                        axi.rlast   <= (beat_count == arlen_reg);
 
                         $display("%t READ addr=%0h data=%h result=%h resp=%b",
                             $time, raddr_index, axi.rdata, mem_data, axi.rresp);
 
-                        raddr_index= raddr_index + 1;
-                        beat_count = beat_count + 1;
+                        raddr_index <= raddr_index + 1;
+                        beat_count  <= beat_count + 1;
                     end
-                    axi.rvalid  = 1;
                 end
             endcase
         end
