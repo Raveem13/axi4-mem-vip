@@ -24,7 +24,13 @@ module axi_memory_slave #(
 
     //========== Internal Memory ==========
     logic [DATA_WIDTH-1:0] mem [0:MEM_DEPTH-1];
-    
+
+    initial begin
+        for (int i=0; i<MEM_DEPTH; ++i) begin
+            mem[i] = 0; // initialize memory
+        end
+    end
+
     //========== initialization ==========
     // initial begin
     //     axi.awready = 0;
@@ -82,7 +88,6 @@ module axi_memory_slave #(
     //---------- Output logic ----------
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            // mem <= '{default : 0};
 
             axi.awready <= 0;
             axi.wready  <= 0;
@@ -146,11 +151,6 @@ module axi_memory_slave #(
     // end
 
     //========== Read FSM ==========
-    initial begin
-        for (int i=0; i<MEM_DEPTH; ++i) begin
-            mem[i] = i; // initialize memory with some data
-        end
-    end
 
     logic [7:0] arlen_reg, beat_count;
     logic [31:0] mem_data;
@@ -222,7 +222,7 @@ module axi_memory_slave #(
                         axi.rid     <= arid_reg;
                         axi.rresp   <= mem_data ? 2'b00 : 2'b01;
 
-                        $display("%t READ addr=%0h mem[%0h] = %0h resp=%b",
+                        $display("%t READ addr=%h mem[%0h] = %h resp=%b",
                             $time, axi.araddr, raddr_index,mem_data, axi.rresp);
                         
                         if (beat_count == arlen_reg) begin
@@ -240,12 +240,14 @@ module axi_memory_slave #(
     assign axi.rdata = mem_data;
 
     // Log
-    always_ff @(posedge clk or negedge rst_n) begin
-        // $display("%t [DUT] %s arready=%0d arvalid=%0b araddr=%0h arid=%0h", $time, rstate.name(), axi.arready, axi.arvalid, axi.araddr, axi.arid);
-        // $display("%t [DUT] %s rready=%0d rvalid=%0b rdata=%0h rlast=%0b", $time, rstate.name(), axi.rready, axi.rvalid, axi.rdata, axi.rlast);
-        // $display("%t [DUT] %s araddr=%0h raddr_index=%0h beat_count=%0d", $time, rstate.name(), axi.araddr, raddr_index, beat_count);
+    // always_ff @(posedge clk or negedge rst_n) begin
+    //     // $display("%t [DUT] %s arready=%0d arvalid=%0b araddr=%0h arid=%0h", $time, rstate.name(), axi.arready, axi.arvalid, axi.araddr, axi.arid);
+    //     // $display("%t [DUT] %s rready=%0d rvalid=%0b rdata=%0h rlast=%0b", $time, rstate.name(), axi.rready, axi.rvalid, axi.rdata, axi.rlast);
+    //     // $display("%t [DUT] %s araddr=%0h raddr_index=%0h beat_count=%0d", $time, rstate.name(), axi.araddr, raddr_index, beat_count);
         
-        $display("%t [DUT] %s beat_count=%0d rlast=%0b", $time, rstate.name(), beat_count, axi.rlast);
-    end
+    //     if (rstate inside {R_IDLE, R_DATA}) begin
+    //         $display("%t [DUT] %s beat_count=%0d rlast=%0b", $time, rstate.name(), beat_count, axi.rlast);
+    //     end
+    // end
     
 endmodule

@@ -49,7 +49,7 @@ module tb_top;
     // VCD Dump for GTKWave
     // ---------------------------
     initial begin
-        $dumpfile("dut_read_dump2.vcd");      // name of waveform file
+        $dumpfile("write_read_dump.vcd");      // name of waveform file
         $dumpvars(0, tb_top.axi_if0);       // dump all signals in tb_top hierarchy
     end
 
@@ -57,6 +57,7 @@ module tb_top;
     initial begin
         uvm_config_db#(virtual axi4_if)::set(null, "*", "vif", axi_if0);
         
-        run_test("axi_test");
+        // run_test("axi_test");
+        run_test("axi_wr_rd_test");
     end
 endmodule

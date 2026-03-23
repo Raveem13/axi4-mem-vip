@@ -17,6 +17,7 @@ package tb_pkg;
     `include "sequences/axi_base_sequence.sv"
     `include "sequences/axi_read_sequence.sv"
     `include "sequences/axi_write_sequence.sv"
+    `include "sequences/axi_wr_rd_sequence.sv"
         
     //---------- agents ----------
     `include "agents/axi_sequencer.sv"  
@@ -32,6 +33,7 @@ package tb_pkg;
 
     //---------- tests ----------
     `include "tb/test/axi_test.sv"
+    `include "tb/test/axi_wr_rd_test.sv"
 
     // tb/top_tb.sv
 endpackage
