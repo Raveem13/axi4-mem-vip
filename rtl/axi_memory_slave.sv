@@ -121,11 +121,12 @@ module axi_memory_slave #(
                             if (axi.wstrb[i])
                                 curr_word[8*i +: 8]  = axi.wdata[8*i +: 8];
                         end
-                        mem[waddr_index] = curr_word;
-                        waddr_index = waddr_index + 1;
+                        mem[waddr_index] <= curr_word;
                         
                         $display("%t WRITE addr=%0h data=%h strb=%b result=%h",
                                 $time, waddr_index, axi.wdata, axi.wstrb, curr_word);
+                        
+                        waddr_index <= waddr_index + 1;
                     end
                 end
 
@@ -217,13 +218,13 @@ module axi_memory_slave #(
                     axi.arready <= 0;
                     axi.rvalid  <= 1;
                     if (axi.rvalid && axi.rready) begin
-                        mem_data = mem[raddr_index];
-                        // axi.rdata   <= mem_data;
+                        mem_data    = mem[raddr_index];
+                        axi.rdata   <= mem_data;
                         axi.rid     <= arid_reg;
-                        axi.rresp   <= mem_data ? 2'b00 : 2'b01;
+                        axi.rresp   <= (mem_data !== 'x) ? 2'b00 : 2'b01;
 
                         $display("%t READ addr=%h mem[%0h] = %h resp=%b",
-                            $time, axi.araddr, raddr_index,mem_data, axi.rresp);
+                            $time, axi.araddr, raddr_index, mem_data, axi.rresp);
                         
                         if (beat_count == arlen_reg) begin
                             axi.rlast <= 1;
@@ -237,7 +238,7 @@ module axi_memory_slave #(
         end
     end
 
-    assign axi.rdata = mem_data;
+    // assign axi.rdata = mem_data;
 
     // Log
     // always_ff @(posedge clk or negedge rst_n) begin
