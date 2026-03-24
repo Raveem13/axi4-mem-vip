@@ -87,6 +87,7 @@ module axi_memory_slave #(
 
     //---------- Output logic ----------
     logic [31:0] curr_word;
+    logic [1:0] bresp_reg;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -108,6 +109,7 @@ module axi_memory_slave #(
                         awid_reg    <= axi.awid;
                         awlen_reg   <= axi.awlen;
                         awsize_reg  <= axi.awsize;
+                        bresp_reg   <= (axi.awaddr < MEM_DEPTH * 4) ? 2'b00 : 2'b10;    // RESP OKAY -> 00, SLVERR -> 10
                     end
                 end
                 
@@ -136,7 +138,7 @@ module axi_memory_slave #(
                     axi.wready  <= 0;
                     axi.bvalid  <= 1;
                     axi.bid     <= awid_reg;
-                    axi.bresp   <= (axi.awaddr < MEM_DEPTH * 4) ? 2'b00 : 2'b10;
+                    axi.bresp   <= bresp_reg;
                 end
 
             endcase
