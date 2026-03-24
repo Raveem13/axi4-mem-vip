@@ -128,11 +128,11 @@ module axi_memory_slave #(
                         end
                         mem[waddr_index] <= curr_word;
                         
-                        $display("%t WRITE addr=%0h data=%h strb=%b result=%h",
-                                $time, waddr_index, axi.wdata, axi.wstrb, curr_word);
+                        $display("%t WRITE addr=%0h data=%h strb=%b result=%h wlast=%0b wbeat_count=%0d / awlen=%0d",
+                                $time, waddr_index, axi.wdata, axi.wstrb, curr_word, axi.wlast, wbeat_count, awlen_reg);
                         
                         waddr_index <= waddr_index + 1;
-                        wbeat_count  <= wbeat_count + 1;
+                        wbeat_count <= wbeat_count + 1;
                     end
                 end
 
@@ -159,7 +159,7 @@ module axi_memory_slave #(
 
     //========== Read FSM ==========
 
-    logic [7:0] arlen_reg, beat_count;
+    logic [7:0] arlen_reg, rbeat_count;
     logic [31:0] mem_data;
 
     typedef enum {
@@ -203,7 +203,7 @@ module axi_memory_slave #(
         if (!rst_n) begin
             axi.arready <= 0;
             axi.rvalid  <= 0;
-            beat_count  <= 0;
+            rbeat_count  <= 0;
             axi.rlast   <= 0;
             axi.rdata   <= 0;
             axi.rid     <= 0;
@@ -214,7 +214,7 @@ module axi_memory_slave #(
                     axi.arready <= 1;
                     axi.rvalid  <= 0;
                     axi.rlast   <= 0;
-                    beat_count  <= 0;
+                    rbeat_count  <= 0;
                     if (axi.arvalid && axi.arready) begin
                         raddr_index <= axi.araddr >> 2;
                         arlen_reg   <= axi.arlen;
@@ -225,7 +225,7 @@ module axi_memory_slave #(
                 R_DATA  : begin
                     axi.arready <= 0;
                     axi.rvalid  <= 1;
-                    if (axi.rvalid && axi.rready) begin
+                    if (axi.rvalid && axi.rready && !axi.rlast) begin
                         mem_data    = mem[raddr_index];
                         axi.rdata   <= mem_data;
                         axi.rid     <= arid_reg;
@@ -234,11 +234,11 @@ module axi_memory_slave #(
                         $display("%t READ addr=%h mem[%0h] = %h resp=%b",
                             $time, axi.araddr, raddr_index, mem_data, axi.rresp);
                         
-                        if (beat_count == arlen_reg) begin
+                        if (rbeat_count == arlen_reg) begin
                             axi.rlast   <= 1;
                         end else begin
                             raddr_index <= raddr_index + 1;
-                            beat_count  <= beat_count + 1;
+                            rbeat_count  <= rbeat_count + 1;
                         end
                     end
                 end
@@ -263,7 +263,7 @@ module axi_memory_slave #(
     // wlast burst counter validation
     assert property (@(posedge clk)
         (wstate == W_DATA && axi.wvalid && axi.wready && axi.wlast)
-        |-> (beat_count == awlen_reg)
-    ) else $error("wlast/awlen mismatch");
+        |-> (wbeat_count == awlen_reg)
+    ) else $error("%t [DUT] wlast/awlen mismatch %0d != %0d", $time, wbeat_count, awlen_reg);
 
 endmodule
