@@ -66,19 +66,19 @@ module axi_memory_slave #(
 
         case (wstate)
             W_IDLE : begin
-                // axi.awready = 1;
+                axi.awready = 1;
                 if (axi.awvalid && axi.awready)
                     next_wstate = W_DATA;
             end
 
             W_DATA : begin
-                // axi.wready  = 1;
+                axi.wready  = 1;
                 if (axi.wlast && axi.wvalid && axi.wready)
                     next_wstate = W_RESP;
             end
 
             W_RESP : begin
-                // axi.bvalid  = 1;
+                axi.bvalid  = 1;
                 if (axi.bready && axi.bvalid)
                     next_wstate = W_IDLE;
             end
@@ -86,6 +86,8 @@ module axi_memory_slave #(
     end
 
     //---------- Output logic ----------
+    logic [31:0] curr_word;
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
 
@@ -93,7 +95,7 @@ module axi_memory_slave #(
             axi.wready  <= 0;
             axi.bvalid  <= 0;
             axi.bid     <= 0;
-            // axi.bresp   <= 0;
+            axi.bresp   <= 0;
         end
         else begin
             case (wstate)
@@ -114,7 +116,6 @@ module axi_memory_slave #(
                     axi.wready  <= 1;
                     axi.bvalid  <= 0;
                     if (axi.wvalid && axi.wready) begin
-                        logic [31:0] curr_word;
                         curr_word = mem[waddr_index];
 
                         for (int i=0; i<4; ++i) begin
@@ -134,8 +135,8 @@ module axi_memory_slave #(
                     axi.awready <= 0;
                     axi.wready  <= 0;
                     axi.bvalid  <= 1;
-                    axi.bid     <= axi.awid;
-                    axi.bresp   <= (axi.awaddr < MEM_DEPTH * 4) ? 2'b00 : 2'b01;
+                    axi.bid     <= awid_reg;
+                    axi.bresp   <= (axi.awaddr < MEM_DEPTH * 4) ? 2'b00 : 2'b10;
                 end
 
             endcase
@@ -199,6 +200,8 @@ module axi_memory_slave #(
             axi.rvalid  <= 0;
             beat_count  <= 0;
             axi.rlast   <= 0;
+            axi.rdata   <= 0;
+            axi.rid     <= 0;
             axi.rresp   <= 0;
         end else begin
             case (rstate)
@@ -221,13 +224,13 @@ module axi_memory_slave #(
                         mem_data    = mem[raddr_index];
                         axi.rdata   <= mem_data;
                         axi.rid     <= arid_reg;
-                        axi.rresp   <= (mem_data !== 'x) ? 2'b00 : 2'b01;
+                        axi.rresp   <= (mem_data !== 'x) ? 2'b00 : 2'b10; // RESP OKAY -> 00, SLVERR -> 10
 
                         $display("%t READ addr=%h mem[%0h] = %h resp=%b",
                             $time, axi.araddr, raddr_index, mem_data, axi.rresp);
                         
                         if (beat_count == arlen_reg) begin
-                            axi.rlast <= 1;
+                            axi.rlast   <= 1;
                         end else begin
                             raddr_index <= raddr_index + 1;
                             beat_count  <= beat_count + 1;
