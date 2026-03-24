@@ -88,6 +88,7 @@ module axi_memory_slave #(
     //---------- Output logic ----------
     logic [31:0] curr_word;
     logic [1:0] bresp_reg;
+    logic [7:0] wbeat_count;
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -104,6 +105,7 @@ module axi_memory_slave #(
                     axi.awready <= 1;
                     axi.wready  <= 0;
                     axi.bvalid  <= 0;
+                    wbeat_count <= 0;
                     if (axi.awvalid && axi.awready) begin
                         waddr_index  <= axi.awaddr >> 2;
                         awid_reg    <= axi.awid;
@@ -130,6 +132,7 @@ module axi_memory_slave #(
                                 $time, waddr_index, axi.wdata, axi.wstrb, curr_word);
                         
                         waddr_index <= waddr_index + 1;
+                        wbeat_count  <= wbeat_count + 1;
                     end
                 end
 
@@ -256,4 +259,11 @@ module axi_memory_slave #(
     //     end
     // end
     
+    //========== Assertions ==========
+    // wlast burst counter validation
+    assert property (@(posedge clk)
+        (wstate == W_DATA && axi.wvalid && axi.wready && axi.wlast)
+        |-> (beat_count == awlen_reg)
+    ) else $error("wlast/awlen mismatch");
+
 endmodule
