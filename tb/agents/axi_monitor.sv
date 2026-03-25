@@ -47,6 +47,9 @@ class axi_monitor extends uvm_monitor;
         tr.cmd  = axi_transaction::WRITE;
         tr.addr = vif.awaddr;
         tr.id   = vif.awid;
+        tr.burst_len    = vif.awlen + 1;
+        tr.burst_size   = vif.awsize;
+        tr.burst_type   = vif.awburst;
 
         beats = vif.awlen + 1;
 
@@ -54,13 +57,14 @@ class axi_monitor extends uvm_monitor;
 
         for (int i=0; i<beats; ++i) begin
             
-            while (!(vif.wvalid && vif.wready)) begin
-                @(posedge vif.clk);
-            end
+            // $display("%t [MON] wready=%0d wvalid=%0b wdata=%0h wstrb=%0d wlast=%0b", $time, vif.wready, vif.wvalid, vif.wdata, vif.wstrb, vif.wlast);
+            do @(posedge vif.clk);
+            while (!(vif.wvalid && vif.wready));
+
             tr.data[i] = vif.wdata;
 
         end
-
+        `uvm_info("MON", tr.sprint(), UVM_LOW)
         ap.write(tr);
 
     endtask
@@ -72,6 +76,9 @@ class axi_monitor extends uvm_monitor;
         tr.cmd  = axi_transaction::READ;
         tr.addr = vif.araddr;
         tr.id   = vif.arid;
+        tr.burst_len    = vif.arlen + 1;
+        tr.burst_size   = vif.arsize;
+        tr.burst_type   = vif.arburst;
 
         beats = vif.arlen + 1;
 
@@ -79,14 +86,15 @@ class axi_monitor extends uvm_monitor;
 
         for (int i=0; i<beats; ++i) begin
             
-            while (!(vif.rvalid && vif.rready)) begin
-                @(posedge vif.clk);
-            end
+            do @(posedge vif.clk);
+            while (!(vif.rvalid && vif.rready));
+
             tr.rdata[i] = vif.rdata;
 
         end
-
+        `uvm_info("MON", tr.sprint(), UVM_LOW)
         ap.write(tr);
+
     endtask
     
 endclass
