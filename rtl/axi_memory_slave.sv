@@ -210,37 +210,37 @@ module axi_memory_slave #(
             axi.rresp   <= 0;
         end else begin
             case (rstate)
-                R_IDLE  : begin
+                R_IDLE: begin
                     axi.arready <= 1;
                     axi.rvalid  <= 0;
-                    axi.rlast   <= 0;
-                    rbeat_count  <= 0;
+                    rbeat_count <= 0;
+                    axi.rlast   <= 0;   
                     if (axi.arvalid && axi.arready) begin
                         raddr_index <= axi.araddr >> 2;
+                        arid_reg    <= axi.arid;    
                         arlen_reg   <= axi.arlen;
-                        arid_reg    <= axi.arid;
+                        
                     end
                 end
 
-                R_DATA  : begin
+                R_DATA: begin
                     axi.arready <= 0;
                     axi.rvalid  <= 1;
+
                     if (axi.rvalid && axi.rready && !axi.rlast) begin
-                        mem_data    = mem[raddr_index];
-                        axi.rdata   <= mem_data;
-                        axi.rid     <= arid_reg;
-                        axi.rresp   <= (mem_data !== 'x) ? 2'b00 : 2'b10; // RESP OKAY -> 00, SLVERR -> 10
 
                         $display("%t READ addr=%h mem[%0h] = %h resp=%b",
                             $time, axi.araddr, raddr_index, mem_data, axi.rresp);
                         
-                        if (rbeat_count == arlen_reg) begin
-                            axi.rlast   <= 1;
-                        end else begin
-                            raddr_index <= raddr_index + 1;
-                            rbeat_count  <= rbeat_count + 1;
-                        end
+                        raddr_index = raddr_index + 1;
+                        rbeat_count  <= rbeat_count + 1;
                     end
+
+                    mem_data    = mem[raddr_index];
+                    axi.rdata   <= mem_data;
+                    axi.rid     <= arid_reg;
+                    axi.rresp   <= (mem_data !== 'x) ? 2'b00 : 2'b10; // RESP OKAY -> 00, SLVERR -> 10
+                    axi.rlast   <= (rbeat_count == arlen_reg);
                 end
             endcase
         end

@@ -109,6 +109,50 @@ interface axi4_if #(
         input   rvalid;
 
     endclocking
+    
+    clocking mon_cb @(posedge clk);
+        default input #1 output #0;
+
+        // Write address channel
+        input awvalid;
+        input awaddr;
+        input awid;
+        input awlen;
+        input awsize;
+        input awburst;
+        input awready;
+
+        // Write data channel
+        input wvalid;
+        input wdata;
+        input wstrb;
+        input wlast;
+        input wready;
+
+        // Write response channel
+        input bready;
+        input bvalid;
+        input bid;
+        input bresp;
+
+        // Read address channel
+        input arvalid;
+        input araddr;
+        input arid;
+        input arlen;
+        input arsize;
+        input arburst;
+        input arready;
+
+        // Read data channel
+        input rvalid;
+        input rdata;
+        input rid;
+        input rresp;
+        input rlast;
+        input rready;
+
+    endclocking
 
     //---------- Slave modport (DUT) ----------
     modport slave (
