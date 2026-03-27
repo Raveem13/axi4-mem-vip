@@ -225,23 +225,23 @@ module axi_memory_slave #(
 
                 R_DATA: begin
 
-                    // Issue new data ONLY when needed
-                    if (!axi.rvalid) begin  
-                        mem_data = mem[raddr_index];
-                        axi.rdata  <= mem_data; 
-                        axi.rvalid <= 1;  
-                        axi.rlast  <= (rbeat_count == arlen_reg);  
-                    end  
-                    else if (axi.rvalid && axi.rready) begin  
-                        mem_data = mem[raddr_index + 1];
-                        axi.rdata  <= mem_data;  // NEXT data
-                        axi.rlast  <= ((rbeat_count + 1) == arlen_reg);
-                        raddr_index <= raddr_index + 1;  
-                        rbeat_count <= rbeat_count + 1; 
-                    end 
+                    // HOLD when backpressure
+                    if (axi.rvalid && !axi.rready) begin
+                        // hold everything
+                    end
+                    else begin
+                        logic [31:0] curr_data;
+                        curr_data = mem[raddr_index];
 
-                    axi.rid   <= arid_reg;
-                    axi.rresp <= (mem_data !== 'x) ? 2'b00 : 2'b10;    // RESP OKAY -> 00, SLVERR -> 10
+                        axi.rdata  <= curr_data;
+                        axi.rresp  <= (curr_data !== 'x) ? 2'b00 : 2'b10;
+                        axi.rid    <= arid_reg;
+                        axi.rlast  <= (rbeat_count == arlen_reg);
+                        axi.rvalid <= 1;
+
+                        raddr_index <= raddr_index + 1;
+                        rbeat_count <= rbeat_count + 1;
+                    end
 
                 end
             endcase
