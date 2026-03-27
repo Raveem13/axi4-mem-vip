@@ -199,6 +199,8 @@ module axi_memory_slave #(
     end
 
     //---------- Output logic ----------
+    logic [31:0] curr_data;
+
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             axi.arready <= 0;
@@ -225,12 +227,7 @@ module axi_memory_slave #(
 
                 R_DATA: begin
 
-                    // HOLD when backpressure
-                    if (axi.rvalid && !axi.rready) begin
-                        // hold everything
-                    end
-                    else begin
-                        logic [31:0] curr_data;
+                    if (!axi.rvalid || axi.rready) begin
                         curr_data = mem[raddr_index];
 
                         axi.rdata  <= curr_data;
@@ -242,7 +239,8 @@ module axi_memory_slave #(
                         raddr_index <= raddr_index + 1;
                         rbeat_count <= rbeat_count + 1;
                     end
-
+                    // else HOLD when backpressure
+                    
                 end
             endcase
         end
