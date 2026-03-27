@@ -27,6 +27,7 @@ package tb_pkg;
 
     //---------- scoreboard ----------
     `include "scoreboard/axi_scoreboard.sv"
+    `include "scoreboard/axi_ref_model.sv"
     
     //---------- env ----------
     `include "tb/env/axi_env.sv"

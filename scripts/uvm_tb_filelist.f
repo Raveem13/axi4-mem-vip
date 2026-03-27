@@ -22,6 +22,7 @@ tb/agents/axi_driver.sv
 tb/agents/axi_monitor.sv
 tb/agents/axi_agent.sv
 tb/scoreboard/axi_scoreboard.sv
+tb/scoreboard/axi_ref_model.sv
 
 tb/env/axi_env.sv
 tb/test/axi_test.sv

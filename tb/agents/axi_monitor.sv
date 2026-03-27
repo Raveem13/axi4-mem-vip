@@ -54,6 +54,7 @@ class axi_monitor extends uvm_monitor;
         beats = vif.awlen + 1;
 
         tr.data = new[beats];
+        tr.strb = new[beats];
 
         for (int i=0; i<beats; ++i) begin
             
@@ -62,6 +63,7 @@ class axi_monitor extends uvm_monitor;
             while (!(vif.wvalid && vif.wready));
 
             tr.data[i] = vif.wdata;
+            tr.strb[i] = vif.wstrb;
 
         end
         `uvm_info("MON", tr.sprint(), UVM_LOW)
