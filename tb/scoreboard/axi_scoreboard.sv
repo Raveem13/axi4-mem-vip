@@ -10,8 +10,12 @@ class axi_scoreboard extends uvm_scoreboard;
     
     uvm_analysis_imp #(axi_transaction, axi_scoreboard) analysis_export;
 
-    int awlen;
+    axi_ref_model ref_model;
 
+    int awlen, awsize, waddr;
+    int arlen, arsize, raddr;
+    
+    bit [31:0] actual_rdata, expect_rdata;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -22,14 +26,14 @@ class axi_scoreboard extends uvm_scoreboard;
         analysis_export   = new("analysis_export", this);
         
         `uvm_info("SCB", "Scoreboard built", UVM_LOW)
-        
+        ref_model = new();
     endfunction
 
     function void write(axi_transaction tr);
-        `uvm_info("SCB", 
-                $sformatf("Txn received: cmd=%s, addr=%0h, id=%0h",
-                            tr.cmd.name(), tr.addr, tr.id), 
-                            UVM_MEDIUM)
+        // `uvm_info("SCB", 
+        //         $sformatf("Txn received: cmd=%s, addr=%0h, id=%0h",
+        //                     tr.cmd.name(), tr.addr, tr.id), 
+        //                     UVM_MEDIUM)
         
         if (tr.cmd == axi_transaction::WRITE) begin
             process_write(tr);
@@ -42,12 +46,17 @@ class axi_scoreboard extends uvm_scoreboard;
     function void process_write(axi_transaction tr);
         
         `uvm_info("SCB-WR", "process write", UVM_NONE)
-        awlen = tr.burst_len;
-        
-        for (int i=0; i<awlen; ++i) begin
+        awlen   = tr.burst_len;
+        awsize = tr.burst_size;
+        waddr  = tr.addr;
+
+        for (int beat=0; beat<awlen; beat++) begin
             `uvm_info("SCB-WR", 
-                $sformatf("Beat %0d: data=%h, strb=%b", i, tr.data[i], tr.strb[i]), 
+                $sformatf("Beat %0d: address=%h, data=%h, strb=%b", beat, waddr, tr.data[beat], tr.strb[beat]), 
                 UVM_NONE)
+
+            ref_model.write_mem(waddr, tr.data[beat], tr.strb[beat]);
+            waddr += (1 << awsize);
         end
         
     endfunction
@@ -55,7 +64,18 @@ class axi_scoreboard extends uvm_scoreboard;
     function void process_read(axi_transaction tr);
         
         `uvm_info("SCB-RD", "process read", UVM_NONE)
-        
+        arlen   = tr.burst_len;
+        arsize = tr.burst_size;
+        raddr  = tr.addr;
+
+        for (int beat=0; beat<arlen; beat++) begin
+            
+            actual_rdata = tr.rdata[beat];
+            expect_rdata = ref_model.read_mem(raddr);
+            raddr += (1 << arsize);
+
+            `uvm_info("SCB-RD", $sformatf("Act rdata = %h, Exp rdata = %h", actual_rdata, expect_rdata), UVM_NONE)
+        end
     endfunction
 
 endclass
