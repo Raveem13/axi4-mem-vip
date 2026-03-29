@@ -12,8 +12,8 @@ class axi_scoreboard extends uvm_scoreboard;
 
     axi_ref_model ref_model;
 
-    int awlen, awsize, waddr;
-    int arlen, arsize, raddr;
+    int wd_len, awsize, waddr;
+    int rd_len, arsize, raddr;
 
     bit [31:0] actual_rdata, expect_rdata;
 
@@ -46,11 +46,15 @@ class axi_scoreboard extends uvm_scoreboard;
     function void process_write(axi_transaction tr);
         
         // `uvm_info("SCB-WR", "process write", UVM_NONE)
-        awlen   = tr.burst_len;
+        wd_len   = tr.burst_len;
         awsize = tr.burst_size;
         waddr  = tr.addr;
 
-        for (int beat=0; beat<awlen; beat++) begin
+        if (tr.data.size() !== wd_len) begin
+            `uvm_error("SCB-WR", "Burst size Mismatch")
+        end
+
+        for (int beat=0; beat<wd_len; beat++) begin
             // `uvm_info("SCB-WR", 
             //     $sformatf("Beat %0d: address=%h, data=%h, strb=%b", beat, waddr, tr.data[beat], tr.strb[beat]), 
             //     UVM_NONE)
@@ -64,11 +68,15 @@ class axi_scoreboard extends uvm_scoreboard;
     function void process_read(axi_transaction tr);
         
         // `uvm_info("SCB-RD", "process read", UVM_NONE)
-        arlen   = tr.burst_len;
+        rd_len   = tr.burst_len;
         arsize = tr.burst_size;
         raddr  = tr.addr;
 
-        for (int beat=0; beat<arlen; beat++) begin
+        if (tr.rdata.size() !== rd_len) begin
+            `uvm_error("SCB-RD", "Burst size Mismatch")
+        end
+
+        for (int beat=0; beat<rd_len; beat++) begin
             
             actual_rdata = tr.rdata[beat];
             compare_read(raddr, actual_rdata);
