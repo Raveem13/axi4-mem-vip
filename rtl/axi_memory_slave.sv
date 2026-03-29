@@ -128,8 +128,8 @@ module axi_memory_slave #(
                         end
                         mem[waddr_index] <= curr_word;
                         
-                        $display("%t WRITE addr=%0h data=%h strb=%b result=%h wlast=%0b wbeat_count=%0d / awlen=%0d",
-                                $time, waddr_index, axi.wdata, axi.wstrb, curr_word, axi.wlast, wbeat_count, awlen_reg);
+                        // $display("%t WRITE addr=%0h data=%h strb=%b result=%h wlast=%0b wbeat_count=%0d / awlen=%0d",
+                        //         $time, waddr_index, axi.wdata, axi.wstrb, curr_word, axi.wlast, wbeat_count, awlen_reg);
                         
                         waddr_index <= waddr_index + 1;
                         wbeat_count <= wbeat_count + 1;

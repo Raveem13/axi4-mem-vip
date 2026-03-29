@@ -14,7 +14,7 @@ class axi_scoreboard extends uvm_scoreboard;
 
     int awlen, awsize, waddr;
     int arlen, arsize, raddr;
-    
+
     bit [31:0] actual_rdata, expect_rdata;
 
     function new(string name, uvm_component parent);
@@ -45,15 +45,15 @@ class axi_scoreboard extends uvm_scoreboard;
 
     function void process_write(axi_transaction tr);
         
-        `uvm_info("SCB-WR", "process write", UVM_NONE)
+        // `uvm_info("SCB-WR", "process write", UVM_NONE)
         awlen   = tr.burst_len;
         awsize = tr.burst_size;
         waddr  = tr.addr;
 
         for (int beat=0; beat<awlen; beat++) begin
-            `uvm_info("SCB-WR", 
-                $sformatf("Beat %0d: address=%h, data=%h, strb=%b", beat, waddr, tr.data[beat], tr.strb[beat]), 
-                UVM_NONE)
+            // `uvm_info("SCB-WR", 
+            //     $sformatf("Beat %0d: address=%h, data=%h, strb=%b", beat, waddr, tr.data[beat], tr.strb[beat]), 
+            //     UVM_NONE)
 
             ref_model.write_mem(waddr, tr.data[beat], tr.strb[beat]);
             waddr += (1 << awsize);
@@ -63,7 +63,7 @@ class axi_scoreboard extends uvm_scoreboard;
 
     function void process_read(axi_transaction tr);
         
-        `uvm_info("SCB-RD", "process read", UVM_NONE)
+        // `uvm_info("SCB-RD", "process read", UVM_NONE)
         arlen   = tr.burst_len;
         arsize = tr.burst_size;
         raddr  = tr.addr;
@@ -71,11 +71,21 @@ class axi_scoreboard extends uvm_scoreboard;
         for (int beat=0; beat<arlen; beat++) begin
             
             actual_rdata = tr.rdata[beat];
-            expect_rdata = ref_model.read_mem(raddr);
+            compare_read(raddr, actual_rdata);
             raddr += (1 << arsize);
-
-            `uvm_info("SCB-RD", $sformatf("Act rdata = %h, Exp rdata = %h", actual_rdata, expect_rdata), UVM_NONE)
         end
+    endfunction
+
+    function void compare_read( logic [31:0] addr,
+                                logic [31:0] actual_rdata);
+
+        expect_rdata = ref_model.read_mem(addr);
+        if (actual_rdata !== expect_rdata) begin
+            `uvm_error("SCB", $sformatf("Data MISMATCH @ 0x%0h | Expected=%h Actual=%h", addr, expect_rdata, actual_rdata))
+        end else begin
+            `uvm_info("SCB", $sformatf("Data MATCH @ 0x%0h | Data=%h", addr, actual_rdata), UVM_LOW)
+        end
+        
     endfunction
 
 endclass
