@@ -9,13 +9,15 @@ class axi_monitor extends uvm_monitor;
     `uvm_component_utils(axi_monitor)
     
     virtual axi4_if vif;
-    uvm_analysis_port #(axi_transaction) ap;
+    uvm_analysis_port #(axi_transaction) write_ap;
+    uvm_analysis_port #(axi_transaction) read_ap;
 
     int beats;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        ap = new("ap", this);
+        write_ap = new("write_ap", this);
+        read_ap = new("read_ap", this);
     endfunction
 
     function void build_phase(uvm_phase phase);
@@ -67,7 +69,7 @@ class axi_monitor extends uvm_monitor;
 
         end
         `uvm_info("MON", tr.sprint(), UVM_LOW)
-        ap.write(tr);
+        write_ap.write(tr);
 
     endtask
 
@@ -95,7 +97,7 @@ class axi_monitor extends uvm_monitor;
 
         end
         `uvm_info("MON", tr.sprint(), UVM_LOW)
-        ap.write(tr);
+        read_ap.write(tr);
 
     endtask
     

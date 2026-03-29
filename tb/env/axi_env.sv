@@ -28,7 +28,8 @@ class axi_env extends uvm_env;
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
     
-        agent.mon.ap.connect(scb.analysis_export);
+        agent.mon.write_ap.connect(scb.write_imp);
+        agent.mon.read_ap.connect(scb.read_imp);
 
         `uvm_info("ENV", "Monitor connected to scoreboard", UVM_NONE)
         

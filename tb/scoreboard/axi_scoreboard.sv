@@ -5,10 +5,14 @@
 // Description : checks transactions
 //==========================================================
 
+`uvm_analysis_imp_decl(_write)
+`uvm_analysis_imp_decl(_read)
+
 class axi_scoreboard extends uvm_scoreboard;
     `uvm_component_utils(axi_scoreboard)
     
-    uvm_analysis_imp #(axi_transaction, axi_scoreboard) analysis_export;
+    uvm_analysis_imp_write #(axi_transaction, axi_scoreboard) write_imp;
+    uvm_analysis_imp_read #(axi_transaction, axi_scoreboard) read_imp;
 
     axi_ref_model ref_model;
 
@@ -23,24 +27,20 @@ class axi_scoreboard extends uvm_scoreboard;
 
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
-        analysis_export   = new("analysis_export", this);
-        
+
         `uvm_info("SCB", "Scoreboard built", UVM_LOW)
+        write_imp = new("write_imp", this);
+        read_imp  = new("read_imp", this);
         ref_model = new();
+        
     endfunction
 
-    function void write(axi_transaction tr);
-        // `uvm_info("SCB", 
-        //         $sformatf("Txn received: cmd=%s, addr=%0h, id=%0h",
-        //                     tr.cmd.name(), tr.addr, tr.id), 
-        //                     UVM_MEDIUM)
-        
-        if (tr.cmd == axi_transaction::WRITE) begin
-            process_write(tr);
-        end else begin
-            process_read(tr);
-        end
+    function void write_write(axi_transaction txn);
+        process_write(txn);
+    endfunction
 
+    function void write_read(axi_transaction txn);
+        process_read(txn);
     endfunction
 
     function void process_write(axi_transaction tr);
