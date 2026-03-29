@@ -20,6 +20,7 @@ class axi_scoreboard extends uvm_scoreboard;
     int rd_len, arsize, raddr;
 
     bit [31:0] actual_rdata, expect_rdata;
+    bit [31:0] prev_data, new_data;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -59,7 +60,19 @@ class axi_scoreboard extends uvm_scoreboard;
             //     $sformatf("Beat %0d: address=%h, data=%h, strb=%b", beat, waddr, tr.data[beat], tr.strb[beat]), 
             //     UVM_NONE)
 
+            // Read OLD memory
+            prev_data = ref_model.read_mem(waddr); 
+
             ref_model.write_mem(waddr, tr.data[beat], tr.strb[beat]);
+
+            // Read NEW memory
+            new_data = ref_model.read_mem(waddr);
+
+            `uvm_info("SCB-WR", 
+                    $sformatf("Beat %0d: address=%h, Prev Data=%h | wdata=%h, strb=%b | New Data=%h", 
+                                beat, waddr, prev_data, tr.data[beat], tr.strb[beat], new_data), 
+                    UVM_LOW)
+
             waddr += (1 << awsize);
         end
         
