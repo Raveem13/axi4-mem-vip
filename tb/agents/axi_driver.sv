@@ -33,7 +33,8 @@ class axi_driver extends uvm_driver #(axi_transaction);
 
             if (tr.cmd == axi_transaction::WRITE) begin
                 drive_write(tr);
-            end else begin
+            end 
+            else begin
                 drive_read(tr);
             end
 
@@ -81,10 +82,13 @@ class axi_driver extends uvm_driver #(axi_transaction);
         //---------- write response channel ----------
         vif.drv_wr_cb.bready <= 1;
 
-        do @(vif.drv_wr_cb);
-        while(!vif.drv_wr_cb.bvalid);
+        // do @(vif.drv_wr_cb);
+        // while(!vif.drv_wr_cb.bvalid);
 
-        vif.drv_wr_cb.bready <= 0;
+        // vif.drv_wr_cb.bready <= 0;
+
+        // @(vif.drv_wr_cb);
+
     endtask
 
     //========== drive read txn ==========
@@ -112,10 +116,10 @@ class axi_driver extends uvm_driver #(axi_transaction);
         //---------- read data channel ----------
         vif.drv_rd_cb.rready  <= 1;
             
-        do @(vif.drv_rd_cb);
-        while(!(vif.drv_rd_cb.rvalid && vif.drv_rd_cb.rlast));
+        // do @(vif.drv_rd_cb);
+        // while(!(vif.drv_rd_cb.rvalid && vif.drv_rd_cb.rlast));
 
-        vif.drv_rd_cb.rready  <= 0;
+        // vif.drv_rd_cb.rready  <= 0;
 
     endtask
 

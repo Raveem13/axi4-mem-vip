@@ -149,13 +149,13 @@ module axi_memory_slave #(
     end
 
     // gated log
-    // always_ff @(posedge clk or negedge rst_n) begin
+    always_ff @(posedge clk or negedge rst_n) begin
     //     $display("%t [DUT-I/f] %s awready=%0d awvalid=%0b awaddr=%0h awid=%0h", $time, wstate.name(), axi.awready, axi.awvalid, axi.awaddr, axi.awid);
     //     $display("%t [DUT-I/f] %s wready=%0d wvalid=%0b wdata=%0h wstrb=%0d wlast=%0b", $time, wstate.name(), axi.wready, axi.wvalid, axi.wdata, axi.wstrb, axi.wlast);
-    //     $display("%t [DUT] %s bvalid=%0b bresp=%0d bid=%0h", $time, wstate.name(), axi.bvalid, axi.bresp, axi.bid);
+        $display("%t [DUT] %s bvalid=%0b bresp=%0d bid=%0h", $time, wstate.name(), axi.bvalid, axi.bresp, axi.bid);
     //     // $display("address awaddr=%0h waddr_reg=%0h", axi.awaddr, addr_index);
     //     // $strobe("%t mem[%0h] = %h", $time, addr_index-1, mem[addr_index-1]);
-    // end
+    end
 
     //========== Read FSM ==========
 
