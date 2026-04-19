@@ -66,19 +66,16 @@ module axi_memory_slave #(
 
         case (wstate)
             W_IDLE : begin
-                axi.awready = 1;
                 if (axi.awvalid && axi.awready)
                     next_wstate = W_DATA;
             end
 
             W_DATA : begin
-                axi.wready  = 1;
                 if (axi.wlast && axi.wvalid && axi.wready)
                     next_wstate = W_RESP;
             end
 
             W_RESP : begin
-                axi.bvalid  = 1;
                 if (axi.bready && axi.bvalid)
                     next_wstate = W_IDLE;
             end

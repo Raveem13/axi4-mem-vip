@@ -43,7 +43,7 @@ class axi_wr_rd_sequence extends axi_base_sequence;
                 burst_len   == w_tr.burst_len;
                 burst_size  == w_tr.burst_size;
                 burst_type  == w_tr.burst_type;
-                id          == w_tr.id;   // optional but good
+                id          != w_tr.id;   // optional but good
             });
 
             `uvm_info("RD_SEQ", $sformatf("Read: %s", r_tr.sprint()), UVM_MEDIUM)

@@ -87,8 +87,6 @@ class axi_driver extends uvm_driver #(axi_transaction);
 
         // vif.drv_wr_cb.bready <= 0;
 
-        // @(vif.drv_wr_cb);
-
     endtask
 
     //========== drive read txn ==========
